@@ -112,8 +112,11 @@ function selectCharacter(character) {
 
 // Démarrer le jeu automatiquement
 function startGameAutomatically() {
+    // Masquer la sélection, afficher le combat
     characterSelection.classList.add('hidden');
     combatZone.classList.remove('hidden');
+    
+    // Afficher footer et console (ils ont déjà flex dans le HTML)
     footerZone.classList.remove('hidden');
     consoleZone.classList.remove('hidden');
     
@@ -134,7 +137,10 @@ function updateCharactersDisplay() {
     
     charactersArea.innerHTML = '';
     const aliveChars = game.getAliveCharacters();
-    const currentCharacter = game.turnOrder[0];
+    // Le personnage actuel est le premier de turnOrder (s'il existe et est vivant)
+    const currentCharacter = game.turnOrder.length > 0 && game.turnOrder[0].status === 'playing' 
+        ? game.turnOrder[0] 
+        : null;
     
     game.characters.forEach(char => {
         const isCurrent = char === currentCharacter;
@@ -296,7 +302,7 @@ function showActionButtons(character) {
     healActions.style.display = 'none';
     
     actionContent.innerHTML = '';
-    actionContent.className = 'flex-1 overflow-hidden min-h-0';
+    actionContent.className = 'overflow-x-auto pb-2';
     actionContent.appendChild(normalActions);
     actionContent.appendChild(specialActions);
     actionContent.appendChild(healActions);
@@ -532,22 +538,18 @@ function nextCharacterTurn() {
         return;
     }
     
-    // Trouver le prochain personnage vivant
-    let currentCharacter = null;
-    while (game.turnOrder.length > 0) {
-        currentCharacter = game.turnOrder.shift();
-        if (currentCharacter.status === 'playing') {
-            break;
-        }
-        currentCharacter = null;
-    }
+    // Nettoyer turnOrder des personnages morts
+    game.turnOrder = game.turnOrder.filter(char => char.status === 'playing');
     
-    if (!currentCharacter) {
-        // Tous les personnages ont joué, commencer un nouveau tour
+    if (game.turnOrder.length === 0) {
+        // Tous les personnages ont joué ou sont morts, commencer un nouveau tour
         game.startTurn();
         nextCharacterTurn();
         return;
     }
+    
+    // Prendre le premier personnage vivant de la liste
+    const currentCharacter = game.turnOrder.shift();
     
     updateCharactersDisplay();
     updateStatistics();
@@ -570,24 +572,29 @@ function nextCharacterTurn() {
     }
 }
 
-// Toggle console
+// Toggle console - Utilise max-h pour collapsible
 if (toggleConsole && consoleZone) {
     const toggleConsoleIcon = document.getElementById('toggleConsoleIcon');
+    const gameConsoleContent = document.getElementById('gameConsole');
     let consoleCollapsed = false;
     
     toggleConsole.addEventListener('click', () => {
         consoleCollapsed = !consoleCollapsed;
         
         if (consoleCollapsed) {
-            consoleZone.classList.remove('h-[120px]', 'md:h-[150px]', 'max-h-[200px]');
-            consoleZone.classList.add('h-[40px]', 'max-h-[40px]');
+            // Réduire la console (masquer le contenu)
+            if (gameConsoleContent) {
+                gameConsoleContent.classList.remove('max-h-40', 'md:max-h-52');
+                gameConsoleContent.classList.add('max-h-0', 'overflow-hidden');
+            }
             if (toggleConsoleIcon) toggleConsoleIcon.textContent = '▲';
-            if (gameConsole) gameConsole.classList.add('hidden');
         } else {
-            consoleZone.classList.remove('h-[40px]', 'max-h-[40px]');
-            consoleZone.classList.add('h-[120px]', 'md:h-[150px]', 'max-h-[200px]');
+            // Agrandir la console (afficher le contenu)
+            if (gameConsoleContent) {
+                gameConsoleContent.classList.remove('max-h-0', 'overflow-hidden');
+                gameConsoleContent.classList.add('max-h-40', 'md:max-h-52', 'overflow-y-auto');
+            }
             if (toggleConsoleIcon) toggleConsoleIcon.textContent = '▼';
-            if (gameConsole) gameConsole.classList.remove('hidden');
         }
     });
 }

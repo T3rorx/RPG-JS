@@ -38,7 +38,8 @@ export class Game {
     }
 
     shuffleTurnOrder() {
-        this.turnOrder = [...this.characters].sort(() => Math.random() - 0.5);
+        // Ne mélanger que les personnages vivants
+        this.turnOrder = this.getAliveCharacters().sort(() => Math.random() - 0.5);
     }
 
     getAliveCharacters() {
@@ -217,20 +218,20 @@ export class Game {
             return;
         }
         
+        // Appliquer les effets de fin du tour précédent AVANT de commencer le nouveau tour
+        this.applyEndTurnEffects();
+        
         this.currentTurn++;
-        this.log(`⚔️ === TOUR ${this.currentTurn} === ⚔️ (${this.turnLeft - 1} tours restants)`);
+        this.turnLeft--;
+        this.log(`⚔️ === TOUR ${this.currentTurn} === ⚔️ (${this.turnLeft} tours restants)`);
         
         // Récupération de mana pour tous les personnages vivants
         alive.forEach(char => {
             char.recoverMana(GAME_CONFIG.MANA_RECOVERY_PER_TURN);
         });
         
-        // Appliquer les effets de fin de tour
-        this.applyEndTurnEffects();
-        
-        // Mélanger l'ordre des tours
+        // Mélanger l'ordre des tours (seulement les vivants)
         this.shuffleTurnOrder();
-        this.turnLeft--;
         
         this.dispatchEvent('turnStarted');
     }
@@ -253,10 +254,12 @@ export class Game {
             // Réinitialiser les effets temporaires
             char.darkVisionActive = false;
             char.frostArmorActive = false;
-            char.rageActive = false;
-            if (char.rageActive === false && char.dmg > char.originalDmg) {
+            
+            // Restaurer les dégâts du Berzerker si Rage était active
+            if (char.rageActive && char.dmg > char.originalDmg) {
                 char.dmg = char.originalDmg;
             }
+            char.rageActive = false;
         });
     }
 
