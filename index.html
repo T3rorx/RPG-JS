@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Combat Arena - Battle Royale</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'attack-flash': 'attackFlash 0.6s ease-out',
+                        'heal-flash': 'healFlash 0.6s ease-out',
+                        'special-flash': 'specialFlash 0.8s ease-out',
+                        'danger-pulse': 'dangerPulse 0.8s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        attackFlash: {
+                            '0%, 100%': { backgroundColor: 'rgba(255, 0, 0, 0)' },
+                            '50%': { backgroundColor: 'rgba(255, 0, 0, 0.3)' },
+                        },
+                        healFlash: {
+                            '0%, 100%': { backgroundColor: 'rgba(34, 197, 94, 0)' },
+                            '50%': { backgroundColor: 'rgba(34, 197, 94, 0.3)' },
+                        },
+                        specialFlash: {
+                            '0%, 100%': { backgroundColor: 'rgba(168, 85, 247, 0)' },
+                            '50%': { backgroundColor: 'rgba(168, 85, 247, 0.4)' },
+                        },
+                        dangerPulse: {
+                            '0%, 100%': {
+                                borderColor: 'rgba(239, 68, 68, 0.5)',
+                                boxShadow: '0 0 0 1px rgba(239, 68, 68, 0.5)',
+                            },
+                            '50%': {
+                                borderColor: 'rgba(239, 68, 68, 1)',
+                                boxShadow: '0 0 10px rgba(239, 68, 68, 0.8)',
+                            },
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-white flex flex-col h-screen overflow-hidden">
+    <!-- HEADER ZONE -->
+    <header id="headerZone" class="bg-gray-800 border-b border-gray-700 flex-none min-h-[60px] md:min-h-[80px]">
+        <div class="container mx-auto px-2 md:px-4 py-2 h-full flex flex-col md:flex-row items-center justify-between gap-2">
+            <div class="flex items-center gap-2 md:gap-6 w-full md:w-auto justify-between md:justify-start">
+                <h1 class="text-base md:text-xl font-bold truncate">⚔️ RPG Combat Arena</h1>
+                <div class="flex items-center gap-1 md:gap-2">
+                    <div id="statusIndicator" class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
+                    <span id="statusText" class="text-xs md:text-sm font-semibold truncate">En attente...</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-end">
+                <div class="flex gap-2 md:gap-4 text-xs md:text-sm">
+                    <div class="text-center">
+                        <div class="text-[10px] md:text-xs text-gray-400">Vivants</div>
+                        <div id="aliveCount" class="text-base md:text-lg font-bold text-green-500">0</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-[10px] md:text-xs text-gray-400">Tours</div>
+                        <div id="turnsRemaining" class="text-base md:text-lg font-bold text-blue-500">10</div>
+                    </div>
+                </div>
+                <button id="themeToggle" class="p-1 md:p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors" title="Changer le thème">
+                    <span id="themeIcon" class="text-lg md:text-xl">🌙</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN ZONE -->
+    <main id="mainZone" class="bg-gray-900 overflow-y-auto flex-1 min-h-0">
+        <!-- Sélection de personnage -->
+        <div id="characterSelection" class="container mx-auto px-2 md:px-4 py-4 md:py-6">
+            <h2 class="text-xl md:text-2xl font-bold mb-2 md:mb-4 text-center">🎮 Choisissez votre personnage</h2>
+            <p class="text-gray-400 mb-4 md:mb-6 text-center text-sm md:text-base">Les autres personnages seront contrôlés par l'ordinateur</p>
+            <div id="characterSelectionButtons" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 max-w-4xl mx-auto">
+                <!-- Boutons générés dynamiquement -->
+            </div>
+        </div>
+
+        <!-- Zone de combat -->
+        <div id="combatZone" class="hidden container mx-auto px-2 md:px-4 py-2 md:py-4">
+            <div class="text-center mb-2 md:mb-4">
+                <h2 class="text-xl md:text-2xl font-bold mb-1 md:mb-2">⚔️ Battle Royale</h2>
+                <p class="text-gray-400 text-xs md:text-sm">Tous contre tous - Le dernier survivant gagne !</p>
+            </div>
+            <div id="charactersArea" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-4">
+                <!-- Cartes de personnages générées dynamiquement -->
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER ZONE -->
+    <footer id="footerZone" class="bg-gray-800 border-t border-gray-700 hidden flex-none h-[180px] md:h-[200px] max-h-[250px] overflow-hidden">
+        <div class="container mx-auto px-2 md:px-4 py-2 md:py-3 h-full flex flex-col overflow-hidden">
+            <!-- Timeline -->
+            <div class="mb-2 md:mb-3 flex-shrink-0">
+                <div class="text-[10px] md:text-xs text-gray-400 mb-1">📍 Ordre du tour</div>
+                <div id="turnTimeline" class="flex gap-1 md:gap-2 overflow-x-auto pb-2">
+                    <!-- Timeline items générés dynamiquement -->
+                </div>
+            </div>
+
+            <!-- Zone d'actions -->
+            <div id="actionArea" class="hidden flex-1 flex flex-col min-h-0 overflow-hidden">
+                <div class="flex gap-1 mb-2 border-b border-gray-600 flex-shrink-0">
+                    <button id="tabNormal" class="px-2 md:px-3 py-1 text-[10px] md:text-xs font-semibold transition-colors text-white border-b-2 border-blue-500 cursor-pointer hover:text-white flex-1 md:flex-none" data-tab="normal">
+                        ⚔️ Attaque
+                    </button>
+                    <button id="tabSpecial" class="px-2 md:px-3 py-1 text-[10px] md:text-xs font-semibold transition-colors text-gray-400 border-b-2 border-transparent cursor-pointer hover:text-white disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none" data-tab="special">
+                        ✨ Spécial
+                    </button>
+                    <button id="tabHeal" class="px-2 md:px-3 py-1 text-[10px] md:text-xs font-semibold transition-colors text-gray-400 border-b-2 border-transparent cursor-pointer hover:text-white disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-none" data-tab="heal">
+                        💚 Soin
+                    </button>
+                </div>
+                <div id="actionContent" class="flex-1 overflow-x-auto overflow-y-hidden pb-2 min-h-0">
+                    <!-- Cartes d'action générées dynamiquement -->
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- CONSOLE ZONE -->
+    <div id="consoleZone" class="bg-black border-t border-gray-800 hidden flex-none h-[120px] md:h-[150px] max-h-[200px] overflow-hidden">
+        <div class="container mx-auto px-2 md:px-4 py-1 md:py-2 h-full flex flex-col">
+            <div class="flex items-center justify-between mb-1 flex-shrink-0">
+                <span class="text-[10px] md:text-xs text-gray-500 font-semibold">📜 Console</span>
+                <button id="toggleConsole" class="text-xs text-gray-500 hover:text-white transition-colors" aria-label="Réduire/Agrandir la console">
+                    <span id="toggleConsoleIcon">▼</span>
+                </button>
+            </div>
+            <div id="gameConsole" class="flex-1 overflow-y-auto font-mono text-[10px] md:text-xs text-gray-400 min-h-0">
+                <p class="text-gray-600">En attente du début de la partie...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

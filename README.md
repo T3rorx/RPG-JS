@@ -1,174 +1,187 @@
 # 🎮 RPG Combat Arena
 
-Un jeu de combat tour par tour en JavaScript vanilla avec interface HTML/Tailwind CSS.
+A turn-based RPG combat game built with vanilla JavaScript and Tailwind CSS. Battle Royale mode where you choose your character and fight against AI-controlled opponents.
 
-## 🎯 Description
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38bdf8)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-Ce projet implémente un système de combat RPG où plusieurs personnages de classes différentes s'affrontent dans une arène de gladiateurs. Le jeu se joue au tour par tour, avec chaque personnage pouvant utiliser des attaques normales ou spéciales.
+## ✨ Features
+
+- **7 Unique Character Classes**: Fighter, Paladin, Monk, Berzerker, Assassin, Wizard, and IceMage
+- **Battle Royale Mode**: Free-for-all combat where only the last survivor wins
+- **Turn-Based Combat**: Strategic gameplay with normal and special attacks
+- **AI Opponents**: Computer-controlled characters with intelligent decision-making
+- **Beautiful UI**: Modern, responsive interface built entirely with Tailwind CSS
+- **Visual Feedback**: Animated health/mana bars, floating damage numbers, combat animations
+- **Real-time Statistics**: Live dashboard showing game state and character status
+
+## 🎯 Gameplay
+
+1. **Choose Your Character**: Select from 7 unique classes at the start
+2. **Battle Royale**: Fight against 5 AI-controlled opponents
+3. **Turn-Based Actions**: 
+   - Normal attacks (no mana cost)
+   - Special attacks (mana cost varies by class)
+   - Healing abilities (for certain classes)
+4. **Win Conditions**: 
+   - Last character standing, OR
+   - Highest HP after 10 turns
 
 ## 🏗️ Architecture
 
-Le projet utilise la Programmation Orientée Objet (POO) avec JavaScript ES6+ :
+### Core Classes
 
-- **Classe de base** : `Character` - Classe parente pour tous les personnages
-- **Classes spécialisées** :
-  - `Fighter` - Combattant équilibré
-  - `Paladin` - Chevalier puissant et défensif
-  - `Monk` - Prêtre qui peut se guérir
-  - `Berzerker` - Bourrin avec attaque élevée
-  - `Assassin` - Rusé et fourbe
-  - `Wizard` - Puissant sage utilisant des sorts magiques
-  - `IceMage` - Mage de Glace (classe custom) ❄️
+- **`Character`**: Base class for all characters
+- **`Fighter`**: Balanced warrior with Dark Vision ability
+- **`Paladin`**: Tank with Healing Lightning
+- **`Monk`**: Support class with healing abilities
+- **`Berzerker`**: High damage, no mana, Rage ability
+- **`Assassin`**: Glass cannon with Shadow Hit
+- **`Wizard`**: Magic user with Fireball
+- **`IceMage`**: Custom ice mage with Ice Shard and Frost Armor
 
-- **Système de jeu** : `Game` - Gère le déroulement de la partie
+### Game Logic
 
-## 📁 Structure des fichiers
+- **`Game`**: Main game controller managing turns, combat, and game state
+- **`AI`**: Basic AI for computer-controlled characters
+- **UI Modules**: DamageFloater, AnimationManager, TurnTimeline, EffectBadges
+
+## 📁 Project Structure
 
 ```
 RPG-JS/
-├── index.html          # Interface HTML principale
-├── js/
-│   ├── Character.js   # Classe de base
-│   ├── Fighter.js     # Classe Fighter
-│   ├── Paladin.js      # Classe Paladin
-│   ├── Monk.js         # Classe Monk
-│   ├── Berzerker.js    # Classe Berzerker
-│   ├── Assassin.js     # Classe Assassin
-│   ├── Wizard.js       # Classe Wizard
-│   ├── IceMage.js      # Classe IceMage (custom)
-│   ├── Game.js         # Classe Game
-│   └── main.js         # Point d'entrée principal
-├── test.js             # Tests unitaires des classes
-├── test-game.js        # Test du jeu complet
-└── README.md           # Ce fichier
+├── index.html              # Main HTML file
+├── README.md               # This file
+└── js/
+    ├── main.js             # Entry point and UI logic
+    ├── Game.js             # Game logic and combat system
+    ├── AI.js               # AI for computer players
+    ├── Character.js        # Base character class
+    ├── Fighter.js          # Fighter class
+    ├── Paladin.js          # Paladin class
+    ├── Monk.js             # Monk class
+    ├── Berzerker.js        # Berzerker class
+    ├── Assassin.js         # Assassin class
+    ├── Wizard.js           # Wizard class
+    ├── IceMage.js          # IceMage class
+    ├── config/
+    │   ├── constants.js    # Game constants
+    │   └── classEmojis.js   # Class emojis and colors
+    ├── ui/
+    │   ├── DamageFloater.js    # Floating damage numbers
+    │   ├── AnimationManager.js # Combat animations
+    │   └── TurnTimeline.js     # Turn order display
+    └── utils/
+        └── effectBadges.js      # Buff/debuff badges
 ```
 
-## 🎲 Classes et Capacités
+## 🚀 Getting Started
 
-### Fighter (Grace)
-- **HP** : 12 | **Mana** : 40 | **Dégâts** : 4
-- **Dark Vision** : 5 dégâts, coûte 20 mana, réduit les dégâts reçus de 2 au prochain tour
+### Prerequisites
 
-### Paladin (Ulder)
-- **HP** : 16 | **Mana** : 160 | **Dégâts** : 3
-- **Healing Lightning** : 4 dégâts, soigne de 5 hp, coûte 40 mana
+- A modern web browser (Chrome, Firefox, Safari, Edge)
+- No build tools or dependencies required!
 
-### Monk (Moana)
-- **HP** : 8 | **Mana** : 200 | **Dégâts** : 2
-- **Heal** : Soigne de 8 hp, coûte 25 mana
+### Installation
 
-### Berzerker (Draven)
-- **HP** : 8 | **Mana** : 0 | **Dégâts** : 4
-- **Rage** : +1 dégât permanent, -1 hp, coûte 0 mana (cumulatif)
-
-### Assassin (Carl)
-- **HP** : 6 | **Mana** : 20 | **Dégâts** : 6
-- **Shadow Hit** : 7 dégâts, coûte 20 mana, immunité ce tour, perd 7 hp au tour suivant si l'adversaire survit
-
-### Wizard (Merlin)
-- **HP** : 10 | **Mana** : 200 | **Dégâts** : 2
-- **Fireball** : 7 dégâts, coûte 25 mana 🔥
-
-### IceMage (Frost) ❄️ - Custom
-- **HP** : 9 | **Mana** : 180 | **Dégâts** : 3
-- **Ice Shard** : 5 dégâts, coûte 20 mana, ralentit la cible (-1 dmg pendant 1 tour)
-- **Frost Armor** : Soigne de 4 hp, coûte 30 mana, réduit les dégâts reçus de 3 pendant 1 tour 🛡️
-
-## 🚀 Utilisation
-
-### Dans le navigateur
-
-1. Ouvrez `index.html` dans un navigateur moderne
-2. Cliquez sur "Démarrer la Partie"
-3. Cliquez sur "Tour Suivant" pour faire jouer chaque personnage
-4. Utilisez "Voir les Stats" pour afficher les statistiques dans la console
-
-### Dans la console JavaScript
-
-```javascript
-// Voir les statistiques
-game.watchStats();
-
-// Créer des personnages aléatoires
-game.createRandomCharacters(5);
-
-// Démarrer une partie
-game.startGame();
-
-// Commencer un tour
-game.startTurn();
-
-// Attaquer
-game.normalAttack(game.characters[0], game.characters[1]);
-
-// Attaque spéciale
-game.specialAttack(game.characters[0], game.characters[1]);
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/RPG-JS.git
+cd RPG-JS
 ```
 
-### Tests
+2. Open `index.html` in your web browser:
+```bash
+# On Linux/Mac
+open index.html
+
+# On Windows
+start index.html
+```
+
+Or simply double-click `index.html` in your file explorer.
+
+### Running Locally
+
+You can also use a local server:
 
 ```bash
-# Tester les classes individuelles
-node test.js
+# Python 3
+python -m http.server 8000
 
-# Tester le jeu complet
-node test-game.js
+# Node.js (with http-server)
+npx http-server
+
+# PHP
+php -S localhost:8000
 ```
 
-## 🎮 Règles du Jeu
+Then open `http://localhost:8000` in your browser.
 
-1. **Début de partie** : 5 personnages sont créés (par défaut ou aléatoirement)
-2. **Tours** : La partie dure 10 tours maximum
-3. **Ordre** : Les personnages jouent dans un ordre aléatoire à chaque tour
-4. **Actions** : Chaque personnage peut :
-   - Attaquer normalement (inflige ses dégâts de base)
-   - Utiliser son attaque spéciale (si assez de mana)
-5. **Élimination** : Un personnage avec 0 hp est éliminé
-6. **Récompense** : Éliminer un adversaire donne +20 mana
-7. **Fin de partie** : La partie se termine si :
-   - Il ne reste qu'un survivant → Il gagne
-   - Après 10 tours → Le personnage avec le plus de hp gagne
+## 🎮 How to Play
+
+1. **Start**: The game begins with character selection
+2. **Choose**: Click on your preferred character class
+3. **Combat**: 
+   - When it's your turn, select an action from the tabs
+   - Choose a target (for attacks) or yourself (for healing)
+   - Watch the AI play their turns automatically
+4. **Win**: Be the last survivor or have the most HP after 10 turns!
+
+## 🎨 Character Classes
+
+| Class | HP | Mana | Damage | Special Ability |
+|-------|----|----|--------|----------------|
+| **Fighter** | 12 | 40 | 4 | Dark Vision (5 dmg, -2 dmg taken) |
+| **Paladin** | 16 | 160 | 3 | Healing Lightning (heal 5 HP) |
+| **Monk** | 8 | 200 | 2 | Heal (heal 8 HP) |
+| **Berzerker** | 8 | 0 | 4 | Rage (+1 damage) |
+| **Assassin** | 6 | 20 | 6 | Shadow Hit (7 dmg, lose 7 HP next turn) |
+| **Wizard** | 10 | 200 | 2 | Fireball (7 dmg) |
+| **IceMage** | 9 | 180 | 3 | Ice Shard (5 dmg, slow) / Frost Armor (heal + protection) |
 
 ## 🛠️ Technologies
 
-- **JavaScript ES6+** : Classes, modules, arrow functions
-- **HTML5** : Structure sémantique
-- **Tailwind CSS** : Framework CSS utilitaire (via CDN)
-- **Programmation Orientée Objet** : Héritage, encapsulation, polymorphisme
+- **JavaScript (ES6+)**: Modern JavaScript with classes and modules
+- **Tailwind CSS**: Utility-first CSS framework (via CDN)
+- **HTML5**: Semantic HTML structure
+- **No Frameworks**: Pure vanilla JavaScript for maximum performance
 
-## 📝 Fonctionnalités
+## 📝 Code Style
 
-- ✅ Système de combat tour par tour
-- ✅ 7 classes de personnages avec attaques spéciales
-- ✅ Interface utilisateur moderne avec Tailwind CSS
-- ✅ Console de jeu pour suivre les actions
-- ✅ Système de mana et récupération
-- ✅ Génération aléatoire de personnages
-- ✅ Affichage en temps réel des statistiques
-- ✅ Gestion de la fin de partie
+- **ES6 Modules**: All code uses ES6 import/export
+- **Object-Oriented**: Classes and inheritance for character system
+- **Modular**: Separated concerns (UI, game logic, AI)
+- **Tailwind Only**: No custom CSS, all styling via Tailwind utilities
 
-## 🔮 Améliorations futures
+## 🐛 Known Issues
 
-- [ ] Intelligence artificielle pour les personnages non-joueurs
-- [ ] Interface pour choisir manuellement les actions
-- [ ] Système d'ajout/suppression de personnages avant partie
-- [ ] Équilibrage des classes
-- [ ] Animations CSS
-- [ ] Sons et effets visuels
-- [ ] Statistiques de partie
+- Console may need manual scrolling on very long games
+- Some animations may lag on slower devices
 
-## 👨‍💻 Développement
+## 🔮 Future Improvements
 
-Ce projet a été développé en suivant une méthodologie Agile (Scrum adapté) avec :
-- User Stories détaillées
-- Tests unitaires pour chaque classe
-- Architecture POO propre et maintenable
-- Documentation complète
+- [ ] Advanced AI with strategic decision-making
+- [ ] More character classes
+- [ ] Equipment system
+- [ ] Multiplayer support
+- [ ] Sound effects and music
+- [ ] Mobile app version
 
-## 📄 Licence
+## 📄 License
 
-Projet éducatif - The Hacking Project
+This project is open source and available under the [MIT License](LICENSE).
+
+## 👨‍💻 Author
+
+Created with ❤️ using vanilla JavaScript and Tailwind CSS.
+
+## 🙏 Acknowledgments
+
+- Tailwind CSS for the amazing utility-first framework
+- All the RPG games that inspired this project
 
 ---
 
-**Bon jeu ! ⚔️**
+**Enjoy the game! May the best warrior win! ⚔️**
