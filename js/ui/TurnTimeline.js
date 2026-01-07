@@ -10,15 +10,22 @@ export class TurnTimeline {
         
         timeline.innerHTML = '';
         
-        characters.forEach((char, index) => {
+        // Filtrer seulement les personnages vivants pour la timeline
+        const aliveCharacters = characters.filter(char => char.status === 'playing');
+        
+        if (aliveCharacters.length === 0) {
+            // Aucun personnage vivant, ne rien afficher
+            return;
+        }
+        
+        aliveCharacters.forEach((char, index) => {
             const isCurrent = char === currentCharacter;
-            const isDead = char.status !== 'playing';
             const classInfo = CLASS_EMOJIS[char.className] || CLASS_EMOJIS.Fighter;
             
             const item = document.createElement('div');
             item.className = `flex-shrink-0 p-2 md:p-3 rounded-lg text-center min-w-fit transition-all ${
-                isCurrent ? 'ring-2 ring-yellow-400 bg-yellow-400/20' : 'bg-gray-700'
-            } ${isDead ? 'opacity-50 line-through' : ''}`;
+                isCurrent ? 'ring-2 ring-yellow-400 ring-offset-1 ring-offset-gray-800 bg-yellow-400/20' : 'bg-gray-700'
+            }`;
             
             item.innerHTML = `
                 <div class="text-xl md:text-2xl mb-1">${classInfo.avatar}</div>

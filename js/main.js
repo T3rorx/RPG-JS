@@ -116,7 +116,7 @@ function startGameAutomatically() {
     characterSelection.classList.add('hidden');
     combatZone.classList.remove('hidden');
     
-    // Afficher footer et console (ils ont déjà flex dans le HTML)
+    // Afficher footer et console
     footerZone.classList.remove('hidden');
     consoleZone.classList.remove('hidden');
     
@@ -161,15 +161,22 @@ function updateCharactersDisplay() {
         const statusEmoji = char.status === 'playing' ? (isPlayer ? '👤' : '🤖') : '💀';
         const effectBadgesHtml = EffectBadges.render(char);
         
+        // Déterminer les classes de ring (éviter les conflits)
+        let ringClasses = '';
+        if (isCurrent && isPlayer) {
+            // Si c'est le joueur ET son tour, priorité au ring jaune
+            ringClasses = 'ring-2 ring-yellow-400 ring-offset-2 ring-offset-gray-900';
+        } else if (isCurrent) {
+            ringClasses = 'ring-2 ring-yellow-400 ring-offset-2 ring-offset-gray-900';
+        } else if (isPlayer) {
+            ringClasses = 'ring-2 ring-green-400 ring-offset-2 ring-offset-gray-900';
+        }
+        
         const card = document.createElement('div');
-        card.className = `group ${classInfo.bgColor} rounded-lg p-3 relative overflow-hidden transition-all cursor-pointer ${
+        card.className = `group ${classInfo.bgColor} rounded-lg p-3 relative transition-all cursor-pointer ${
             char.status === 'loser' ? 'opacity-50' : ''
-        } ${
-            isCurrent ? 'ring-2 ring-yellow-400' : ''
-        } ${
-            isPlayer ? 'ring-2 ring-green-400' : ''
-        } ${
-            isInDanger ? 'border-2 border-red-500/50 animate-danger-pulse' : ''
+        } ${ringClasses} ${
+            isInDanger && !isCurrent && !isPlayer ? 'border-2 border-red-500/50 animate-danger-pulse' : ''
         }`;
         card.setAttribute('data-character', char.name);
         
@@ -181,12 +188,11 @@ function updateCharactersDisplay() {
             </div>
         `;
         
-        card.innerHTML = `
+        // Contenu de la carte (avec overflow-hidden pour éviter que le contenu dépasse)
+        const cardContent = document.createElement('div');
+        cardContent.className = 'overflow-hidden';
+        cardContent.innerHTML = `
             ${effectBadgesHtml}
-            
-            <div class="absolute bottom-full left-1/2 -translate-x-1/2 bg-black/95 px-3 py-2 rounded text-xs whitespace-nowrap opacity-0 pointer-events-none transition-opacity duration-200 z-50 mb-2 group-hover:opacity-100">
-                ${tooltipContent}
-            </div>
             
             <div class="flex items-center gap-2 mb-2">
                 <div class="${classInfo.avatarBg} rounded-full w-8 h-8 flex items-center justify-center border flex-shrink-0">
@@ -222,12 +228,23 @@ function updateCharactersDisplay() {
             </div>
         `;
         
+        // Tooltip en dehors du conteneur avec overflow-hidden (pour qu'il ne soit pas coupé)
+        const tooltip = document.createElement('div');
+        tooltip.className = 'absolute bottom-full left-1/2 -translate-x-1/2 bg-black/95 px-3 py-2 rounded text-xs whitespace-nowrap opacity-0 pointer-events-none transition-opacity duration-200 z-50 mb-2 group-hover:opacity-100';
+        tooltip.innerHTML = tooltipContent;
+        
+        card.appendChild(cardContent);
+        card.appendChild(tooltip);
         charactersArea.appendChild(card);
     });
     
-    // Mettre à jour la timeline
-    if (currentCharacter) {
-        TurnTimeline.render(game.turnOrder, currentCharacter);
+    // Mettre à jour la timeline - seulement avec les personnages vivants
+    const aliveTurnOrder = game.turnOrder.filter(char => char.status === 'playing');
+    if (aliveTurnOrder.length > 0 && currentCharacter) {
+        TurnTimeline.render(aliveTurnOrder, currentCharacter);
+    } else if (aliveTurnOrder.length > 0) {
+        // Afficher la timeline même sans currentCharacter (au cas où)
+        TurnTimeline.render(aliveTurnOrder, null);
     }
 }
 
@@ -302,7 +319,7 @@ function showActionButtons(character) {
     healActions.style.display = 'none';
     
     actionContent.innerHTML = '';
-    actionContent.className = 'overflow-x-auto pb-2';
+    actionContent.className = 'flex gap-2 overflow-x-auto pb-2 scrollbar-hide';
     actionContent.appendChild(normalActions);
     actionContent.appendChild(specialActions);
     actionContent.appendChild(healActions);
