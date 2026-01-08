@@ -1,3 +1,4 @@
+
 import { Game } from './Game.js';
 import { Fighter } from './Fighter.js';
 import { Paladin } from './Paladin.js';
@@ -38,6 +39,9 @@ const tabHeal = document.getElementById('tabHeal');
 // Limite de logs dans la console
 const MAX_CONSOLE_LOGS = 50;
 
+// Personnage actuel dont c'est le tour
+let currentTurnCharacter = null;
+
 // Écouter les logs du jeu
 window.addEventListener('gameLog', (e) => {
     if (!gameConsole) return;
@@ -76,7 +80,7 @@ function showCharacterSelection() {
     game.characters.forEach(char => {
         const btn = document.createElement('button');
         const classInfo = CLASS_EMOJIS[char.className] || CLASS_EMOJIS.Fighter;
-        btn.className = 'bg-gray-700 hover:bg-gray-600 rounded-lg p-4 text-left transition';
+        btn.className = 'bg-gray-700 hover:bg-gray-600 rounded-lg p-4 text-left transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900';
         btn.innerHTML = `
             <div class="flex justify-between items-center mb-2">
                 <h3 class="text-xl font-bold">${char.name}</h3>
@@ -275,7 +279,7 @@ function updateStatusVisual(status, turn, icon = '⏳') {
 // Créer une carte d'action
 function createActionCard(icon, actionName, target, details, colorClass, onClick) {
     const card = document.createElement('button');
-    card.className = `${colorClass} rounded-lg p-2 md:p-3 text-center transition-all flex flex-col justify-center border-2 border-transparent hover:-translate-y-0.5 hover:border-blue-500/50 hover:shadow-lg active:translate-y-0 text-white flex-shrink-0 min-w-[120px] md:min-w-[140px]`;
+    card.className = `${colorClass} rounded-lg p-2 md:p-3 text-center transition-all flex flex-col justify-center border-2 border-transparent hover:-translate-y-0.5 hover:border-blue-500/50 hover:shadow-lg active:translate-y-0 text-white flex-shrink-0 min-w-[120px] md:min-w-[140px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800`;
     card.onclick = onClick;
     
     card.innerHTML = `
@@ -294,6 +298,7 @@ function createActionCard(icon, actionName, target, details, colorClass, onClick
 function showActionButtons(character) {
     if (!actionArea || !actionContent) return;
     
+    // Vérifier que le personnage est toujours en vie
     if (character.status !== 'playing') {
         actionArea.classList.add('hidden');
         return;
@@ -531,6 +536,12 @@ function showActionButtons(character) {
 
 // Effectuer une attaque normale
 function performNormalAttack(character, target) {
+    // Vérifier que c'est bien le tour de ce personnage
+    if (character !== currentTurnCharacter) {
+        game.log(`❌ Ce n'est pas le tour de ${character.name} !`);
+        return;
+    }
+    
     if (game.normalAttack(character, target)) {
         updateCharactersDisplay();
         updateStatistics();
@@ -540,6 +551,12 @@ function performNormalAttack(character, target) {
 
 // Effectuer une attaque spéciale
 function performSpecialAttack(character, target, attackType) {
+    // Vérifier que c'est bien le tour de ce personnage
+    if (character !== currentTurnCharacter) {
+        game.log(`❌ Ce n'est pas le tour de ${character.name} !`);
+        return;
+    }
+    
     if (game.specialAttack(character, target, attackType)) {
         updateCharactersDisplay();
         updateStatistics();
@@ -567,11 +584,15 @@ function nextCharacterTurn() {
     
     // Prendre le premier personnage vivant de la liste
     const currentCharacter = game.turnOrder.shift();
+    currentTurnCharacter = currentCharacter; // Stocker le personnage actuel
     
     updateCharactersDisplay();
     updateStatistics();
     
     if (currentCharacter.isAI) {
+        // Masquer les boutons d'action quand c'est le tour d'un personnage IA
+        if (actionArea) actionArea.classList.add('hidden');
+        
         game.log(`🤖 ${currentCharacter.name} (IA) joue...`);
         updateStatusVisual(`🤖 ${currentCharacter.name} (IA) joue...`, game.currentTurn, '🤖');
         
@@ -580,6 +601,7 @@ function nextCharacterTurn() {
             updateCharactersDisplay();
             updateStatistics();
             setTimeout(() => {
+                currentTurnCharacter = null; // Réinitialiser après le tour
                 nextCharacterTurn();
             }, 800);
         }, 500);
@@ -616,23 +638,32 @@ if (toggleConsole && consoleZone) {
     });
 }
 
-// Toggle thème
+// Toggle thème avec persistence améliorée
 if (themeToggle) {
+    const html = document.documentElement;
+    
+    // Charger le thème sauvegardé au démarrage
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        html.classList.remove('dark');
+        document.body.classList.add('light-mode');
+        if (themeIcon) themeIcon.textContent = '☀️';
+    } else {
+        html.classList.add('dark');
+        document.body.classList.remove('light-mode');
+        if (themeIcon) themeIcon.textContent = '🌙';
+    }
+    
     themeToggle.addEventListener('click', () => {
+        const isDark = html.classList.toggle('dark');
         document.body.classList.toggle('light-mode');
-        const isLight = document.body.classList.contains('light-mode');
+        const isLight = !isDark;
+        
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
         if (themeIcon) {
             themeIcon.textContent = isLight ? '☀️' : '🌙';
         }
-        localStorage.setItem('theme', isLight ? 'light' : 'dark');
     });
-    
-    // Charger le thème sauvegardé
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-        document.body.classList.add('light-mode');
-        if (themeIcon) themeIcon.textContent = '☀️';
-    }
 }
 
 // Écouter les événements du jeu
